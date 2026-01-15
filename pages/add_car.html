@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Додати авто</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../style/add_car_style.css">
+</head>
+<body>
+<div class="container">
+    <h2>Додати нове авто</h2>
+
+    <form id="carForm">
+        <label>Марка</label><input type="text" id="marka" required>
+        <label>Модель</label><input type="text" id="model" required>
+        <label>Колір</label><input type="text" id="color" required>
+        <label>Рік</label><input type="number" id="year" min="1886" required>
+        <label>Тип двигуна</label>
+        <select id="engine_type" required>
+            <option value="">Оберіть</option>
+            <option value="Бензин">Бензин</option>
+            <option value="Дизель">Дизель</option>
+            <option value="Електро">Електро</option>
+            <option value="Гібрид">Гібрид</option>
+        </select>
+        <label>Потужність двигуна (к.с.)</label><input type="number" id="engine_power" min="0">
+        <label>Кількість дверей</label><input type="number" id="doors" min="2" max="6">
+        <label>Ціна ($)</label><input type="number" id="price" min="0">
+        <label>Коробка передач</label>
+        <select id="transmission" required>
+            <option value="">Оберіть</option>
+            <option value="Механічна">Механічна</option>
+            <option value="Автоматична">Автоматична</option>
+            <option value="Варіатор">Варіатор</option>
+            <option value="Робот">Робот</option>
+        </select>
+        <label>Основне фото авто</label><input type="file" id="fileInput" accept="image/*" required>
+        <label>Додаткові фото</label> <input type="file" id="additionalPhotos" multiple accept="image/*">
+        <label>Тип кузова</label><input type="text" id="body_type" required>
+        <label>Опис</label><textarea id="description" rows="4" required></textarea>
+        <label>Стан авто</label>
+        <select id="condition" required>
+            <option value="">Оберіть</option>
+            <option value="Нове">Нове</option>
+            <option value="Вживане">Вживане</option>
+        </select>
+        <button type="submit">Додати авто</button>
+    </form>
+    <div id="options-block">
+        <h3>Опції авто</h3>
+        <div class="opt_lable">
+            <label>Назва опції</label><input type="text" id="optionName">
+            <label>Ціна опції</label><input type="number" id="optionPrice">
+        </div>
+        <button id="addOptionBtn">Додати опцію в список</button>
+
+        <table id="optionsTable">
+            <thead>
+                <tr><th>Назва</th><th>Ціна ($)</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <div class="btn_cont">
+            <button id="finishBtn">Завершити та зберегти</button>
+            <button class="skip-btn" onclick="window.location.href='home.html'">Скасувати</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const form = document.getElementById("carForm");
+    const fileInput = document.getElementById("fileInput");
+    const optionsBlock = document.getElementById("options-block");
+    let optionsList = [];
+
+    // Показати блок опцій після першого submit
+    form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        if (!form.checkValidity()) { form.reportValidity(); return; }
+        optionsBlock.style.display = "block";
+        window.scrollTo(0, document.body.scrollHeight);
+    });
+
+    // Додати опцію
+    document.getElementById("addOptionBtn").onclick = function (e) {
+        e.preventDefault();
+        const name = document.getElementById("optionName").value.trim();
+        const price = parseInt(document.getElementById("optionPrice").value);
+        if (name === "" || isNaN(price)) { alert("Заповніть назву та ціну опції!"); return; }
+        optionsList.push({ option_name: name, option_price: price });
+        const row = `<tr><td>${name}</td><td>${price}</td></tr>`;
+        document.querySelector("#optionsTable tbody").innerHTML += row;
+        document.getElementById("optionName").value = "";
+        document.getElementById("optionPrice").value = "";
+    };
+
+    // Завершити та відправити на сервер
+    document.getElementById("finishBtn").onclick = async function (e) {
+        e.preventDefault();
+        const car = {
+            marka: document.getElementById("marka").value,
+            model: document.getElementById("model").value,
+            color: document.getElementById("color").value,
+            year: parseInt(document.getElementById("year").value),
+            engine_type: document.getElementById("engine_type").value,
+            engine_power: parseInt(document.getElementById("engine_power").value),
+            doors: parseInt(document.getElementById("doors").value),
+            price: parseInt(document.getElementById("price").value),
+            transmission: document.getElementById("transmission").value,
+            body_type: document.getElementById("body_type").value,
+            description: document.getElementById("description").value,
+            condition: document.getElementById("condition").value,
+            image: "" // сервер поставить шлях після збереження файлу
+        };
+
+        const formData = new FormData();
+        formData.append("car", JSON.stringify(car));
+        formData.append("options", JSON.stringify(optionsList));
+        if (fileInput.files.length > 0) { formData.append("file", fileInput.files[0]); }
+        const additionalPhotosInput =
+             document.getElementById("additionalPhotos");
+
+        if (additionalPhotosInput.files.length > 0) {
+             for (let file of additionalPhotosInput.files) {
+        formData.append("photos", file);
+            }
+        }
+        const token = sessionStorage.getItem("jwt");
+
+        try {
+            const resp = await fetch("http://localhost:8080/api/v1/admin/addCars", {
+                method: "POST",
+                headers: { "Authorization": "Bearer " + token },
+                body: formData
+            });
+            if (resp.ok) {
+                alert("Авто успішно додано!");
+                window.location.href = "home.html";
+            } else {
+                alert("Помилка при збереженні!");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Помилка з’єднання з сервером!");
+        }
+    };
+</script>
+</body>
+</html>
+

@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Каталог автомобілів</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../style/car_list.css">
+</head>
+<body>
+    <div class="mainCont">
+        <div class="filters-panel" id="filtersPanel">
+            <div class="filters-header">
+                <h4>Фільтри</h4>
+            </div>
+
+            <div class="filters-content">
+                <!-- Стан -->
+                <div class="filter-group">
+                    <label class="filter-label">Стан</label>
+                    <select id="filterCondition" class="filter-select">
+                        <option value="">Всі</option>
+                        <option value="Нове">Нове</option>
+                        <option value="Вживане">Вживане</option>
+                    </select>
+                </div>
+
+                <!-- Тип двигуна -->
+                <div class="filter-group">
+                    <label class="filter-label">Тип двигуна</label>
+                    <select id="filterEngineType" class="filter-select">
+                        <option value="">Всі</option>
+                        <option value="Бензин">Бензин</option>
+                        <option value="Дизель">Дизель</option>
+                        <option value="Електро">Електро</option>
+                        <option value="Гібрид">Гібрид</option>
+                    </select>
+                </div>
+
+                <!-- Коробка передач -->
+                <div class="filter-group">
+                    <label class="filter-label">Коробка передач</label>
+                    <select id="filterTransmission" class="filter-select">
+                        <option value="">Всі</option>
+                        <option value="Механічна">Механічна</option>
+                        <option value="Автоматична">Автоматична</option>
+                        <option value="Варіатор">Варіатор</option>
+                        <option value="Робот">Робот</option>
+                    </select>
+                </div>
+
+                <!-- Колір -->
+                <div class="filter-group">
+                    <label class="filter-label">Колір</label>
+                    <input type="text" id="filterColor" class="filter-input" placeholder="Наприклад: Чорний">
+                </div>
+
+                <!-- Тип кузова -->
+                <div class="filter-group">
+                    <label class="filter-label">Тип кузова</label>
+                    <input type="text" id="filterBodyType" class="filter-input" placeholder="Наприклад: Седан">
+                </div>
+
+                <!-- Рік випуску -->
+                <div class="filter-group">
+                    <label class="filter-label">Рік випуску</label>
+                    <div class="range-inputs">
+                        <input type="number" id="filterYearFrom" class="filter-input-small" placeholder="Від" min="1900" max="2025">
+                        <span>—</span>
+                        <input type="number" id="filterYearTo" class="filter-input-small" placeholder="До" min="1900" max="2025">
+                    </div>
+                </div>
+
+                <!-- Ціна -->
+                <div class="filter-group">
+                    <label class="filter-label">Ціна ($)</label>
+                    <div class="range-inputs">
+                        <input type="number" id="filterPriceFrom" class="filter-input-small" placeholder="Від" min="0">
+                        <span>—</span>
+                        <input type="number" id="filterPriceTo" class="filter-input-small" placeholder="До" min="0">
+                    </div>
+                </div>
+
+                <!-- Потужність двигуна -->
+                <div class="filter-group">
+                    <label class="filter-label">Потужність (к.с.)</label>
+                    <div class="range-inputs">
+                        <input type="number" id="filterPowerFrom" class="filter-input-small" placeholder="Від" min="0">
+                        <span>—</span>
+                        <input type="number" id="filterPowerTo" class="filter-input-small" placeholder="До" min="0">
+                    </div>
+                </div>
+
+                <!-- Кількість дверей -->
+                <div class="filter-group">
+                    <label class="filter-label">Кількість дверей</label>
+                    <div class="range-inputs">
+                        <input type="number" id="filterDoorsFrom" class="filter-input-small" placeholder="Від" min="2" max="5">
+                        <span>—</span>
+                        <input type="number" id="filterDoorsTo" class="filter-input-small" placeholder="До" min="2" max="5">
+                    </div>
+                </div>
+
+                <!-- Кнопки -->
+                <div class="filter-buttons">
+                    <button class="btn-apply-filters" onclick="applyFilters()">Застосувати</button>
+                    <button class="btn-reset-filters" onclick="resetFilters()">Скинути</button>
+                </div>
+            </div>
+        </div>
+       
+        <div class="main">
+            <div class="header-section">
+                <h2>Каталог автомобілів</h2>
+                <button type="button" class="btn-back" onclick="goBack()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Назад
+            </button>
+            </div>
+            <!-- Пошук -->
+            <div class="search-filter-container">
+                <div class="search-wrapper">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Пошук за маркою або моделлю...">
+                    <button class="clear-btn" id="clearBtn" onclick="clearSearch()" style="display: none;">✕</button>
+                    <button class="search-btn" onclick="applyFilters()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <!-- Сітка з автомобілями -->
+            <div class="cars-container">
+                <div id="loadingMessage" class="loading-message" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Завантаження...</p>
+                </div>
+                <div id="row" class="car-grid row"></div>
+                <div id="noResults" class="no-results" style="display: none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    <h3>Нічого не знайдено</h3>
+                    <p>Спробуйте змінити параметри пошуку</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL_GLOB = 'http://localhost:8080/api/v1';
+        let currentUser = null;
+
+        // Показати/приховати хрестик в пошуку
+        document.getElementById('searchInput').addEventListener('input', function() {
+            const clearBtn = document.getElementById('clearBtn');
+            clearBtn.style.display = this.value ? 'block' : 'none';
+        });
+
+        // Очистити пошук
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('clearBtn').style.display = 'none';
+            loadCars();
+        }
+
+        // Завантаження всіх авто
+        async function loadCars() {
+            const token = sessionStorage.getItem('jwt');
+            const loadingMsg = document.getElementById('loadingMessage');
+            const noResults = document.getElementById('noResults');
+            const carGrid = document.getElementById('row');
+
+            loadingMsg.style.display = 'flex';
+            noResults.style.display = 'none';
+            carGrid.innerHTML = '';
+            const wishlistIds = await getUserWishlist();
+            console.log(wishlistIds)
+            // Отримати дані користувача
+            if (token && !currentUser) {
+                try {
+                    const profileRes = await fetch(`${API_URL_GLOB}/currentUser`, {
+                        method: 'GET',
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    if (profileRes.ok) {
+                        currentUser = await profileRes.json();
+                    }
+                } catch (error) {
+                    console.error("Помилка завантаження профілю:", error);
+                }
+            }
+
+            // Отримати список авто
+            try {
+                const carsRes = await fetch(`${API_URL_GLOB}/get-all-car`);
+                if (!carsRes.ok) {
+                    console.error("❌ Не вдалося завантажити авто");
+                    loadingMsg.innerHTML = '<p style="color: #dc3545;">Помилка завантаження</p>';
+                    return;
+                }
+
+                const cars = await carsRes.json();
+                loadingMsg.style.display = 'none';
+
+                if (cars.length === 0) {
+                    noResults.style.display = 'flex';
+                    return;
+                }
+                const isAdmin = currentUser && currentUser.role === 'ADMIN';
+                displayCars(cars, isAdmin,wishlistIds);
+
+            } catch (error) {
+                console.error("Помилка завантаження авто:", error);
+                loadingMsg.innerHTML = '<p style="color: #dc3545;">Помилка завантаження автомобілів</p>';
+            }
+        }
+
+        // Застосування фільтрів
+        async function applyFilters() {
+            const loadingMsg = document.getElementById('loadingMessage');
+            const noResults = document.getElementById('noResults');
+            const carGrid = document.getElementById('row');
+
+            loadingMsg.style.display = 'flex';
+            noResults.style.display = 'none';
+            carGrid.innerHTML = '';
+
+            const filters = {
+                search: document.getElementById('searchInput').value || null,
+                condition: document.getElementById('filterCondition').value || null,
+                engineType: document.getElementById('filterEngineType').value || null,
+                transmission: document.getElementById('filterTransmission').value || null,
+                color: document.getElementById('filterColor').value || null,
+                bodyType: document.getElementById('filterBodyType').value || null,
+                yearFrom: parseInt(document.getElementById('filterYearFrom').value) || null,
+                yearTo: parseInt(document.getElementById('filterYearTo').value) || null,
+                priceFrom: parseInt(document.getElementById('filterPriceFrom').value) || null,
+                priceTo: parseInt(document.getElementById('filterPriceTo').value) || null,
+                enginePowerFrom: parseInt(document.getElementById('filterPowerFrom').value) || null,
+                enginePowerTo: parseInt(document.getElementById('filterPowerTo').value) || null,
+                doorFrom: parseInt(document.getElementById('filterDoorsFrom').value) || null,
+                doorTo: parseInt(document.getElementById('filterDoorsTo').value) || null
+            };
+
+            try {
+                const res = await fetch(`${API_URL_GLOB}/filter`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(filters)
+                });
+
+                if (!res.ok) throw new Error("Помилка фільтрації");
+
+                const cars = await res.json();
+                loadingMsg.style.display = 'none';
+
+                if (cars.length === 0) {
+                    noResults.style.display = 'flex';
+                    return;
+                }
+
+                const isAdmin = currentUser && currentUser.role === 'ADMIN';
+                displayCars(cars, isAdmin);
+
+            } catch (error) {
+                console.error("Помилка:", error);
+                loadingMsg.innerHTML = '<p style="color: #dc3545;">Помилка фільтрації</p>';
+            }
+        }
+    async function getUserWishlist() {
+    const token = sessionStorage.getItem('jwt');
+    if (!token) return [];
+
+    try {
+        const res = await fetch(`${API_URL_GLOB}/wishlist/ids`, {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        });
+
+        if (!res.ok) return [];
+
+        return await res.json(); // масив carId
+    } catch {
+        return [];
+    }
+}
+        
+        // Відображення авто
+        function displayCars(cars, isAdmin,wishlistIds) {
+            const container = document.getElementById('row');
+            
+            cars.forEach(car => {
+                const col = document.createElement('div');
+                col.className = 'col';
+
+                const card = document.createElement('div');
+                card.className = 'card';
+
+                const imageContainer = document.createElement('div');
+imageContainer.className = 'image-container';
+
+const img = document.createElement('img');
+img.src = car.image;
+imageContainer.appendChild(img);
+const buttonCompare = document.createElement('button');
+                buttonCompare.className = 'btn-favorite-overlay btn-compare';
+                buttonCompare.onclick = function() { addToFavorite(car.id_cars); };
+                buttonCompare.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                    </svg>
+                `;
+                buttonCompare.title = "Додати до порівняння";
+                imageContainer.appendChild(buttonCompare);
+
+                // Кнопка "Обране" (червона)
+                const buttonWishlist = document.createElement('button');
+                buttonWishlist.className = 'btn-favorite-overlay btn-wishlist';
+                 if (wishlistIds.includes(car.id_cars)) {
+                        buttonWishlist.classList.add('active');
+                    }
+                buttonWishlist.onclick = function() { addToWishlist(car.id_cars, buttonWishlist); };
+                buttonWishlist.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                `;
+                buttonWishlist.title = "Додати в обране";
+                imageContainer.appendChild(buttonWishlist);
+                card.appendChild(imageContainer);
+                const cardbody = document.createElement('div');
+                cardbody.className = 'card-body';
+
+                const name = document.createElement('h5');
+                name.className = 'card-title';
+                name.textContent = `${car.marka} ${car.model} (${car.year})`;
+                cardbody.appendChild(name);
+
+                const price = document.createElement('h6');
+                price.className = 'card-subtitle mb-2 text-muted';
+                price.textContent = `Ціна: ${car.price}` ;
+                cardbody.appendChild(price);
+
+                const condition = document.createElement('p');
+                condition.className = 'card-text';
+                condition.textContent = `Стан: ${car.condition}`;
+                cardbody.appendChild(condition);
+
+                const fuel = document.createElement('p');
+                fuel.className = 'card-text';
+                fuel.textContent = `Тип двигуна: ${car.engine_type}`;
+                cardbody.appendChild(fuel);
+
+                const transmission = document.createElement('p');
+                transmission.className = 'card-text';
+                transmission.textContent = `КПП: ${car.transmission}`;
+                cardbody.appendChild(transmission);
+
+                card.appendChild(cardbody);
+
+                const footer = document.createElement('div');
+                footer.className = 'card-footer';
+
+                const buttonInfo = document.createElement('button');
+                buttonInfo.className = 'btn_info';
+                buttonInfo.onclick = function() { GetCarDetail(car.id_cars); };
+                buttonInfo.textContent = 'Детальніше';
+                footer.appendChild(buttonInfo);
+                if (isAdmin) {
+                    const buttonEdit = document.createElement('button');
+                    buttonEdit.className = 'btn_edit';
+                    buttonEdit.onclick = function() { editCar(car.id_cars); };
+                    buttonEdit.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                        Редагувати
+                    `;
+                    footer.appendChild(buttonEdit);
+                }
+
+                card.appendChild(footer);
+                col.appendChild(card);
+                container.appendChild(col);
+            });
+        }
+
+        // Скидання фільтрів
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('clearBtn').style.display = 'none';
+            document.getElementById('filterCondition').value = '';
+            document.getElementById('filterEngineType').value = '';
+            document.getElementById('filterTransmission').value = '';
+            document.getElementById('filterColor').value = '';
+            document.getElementById('filterBodyType').value = '';
+            document.getElementById('filterYearFrom').value = '';
+            document.getElementById('filterYearTo').value = '';
+            document.getElementById('filterPriceFrom').value = '';
+            document.getElementById('filterPriceTo').value = '';
+            document.getElementById('filterPowerFrom').value = '';
+            document.getElementById('filterPowerTo').value = '';
+            document.getElementById('filterDoorsFrom').value = '';
+            document.getElementById('filterDoorsTo').value = '';
+
+            loadCars();
+        }
+
+        function GetCarDetail(id) {
+            window.location.href = `car_detail.html?carId=${id}`;
+        }
+        function addToFavorite(id){
+            let favorites = JSON.parse(sessionStorage.getItem("auto")) || [];
+            const carInStorage=sessionStorage.getItem("carInStorage")
+            showNotification("Авто додане до порівняння. Оберіть ще одне авто щоб перейти до порівняння.", "success")
+            if (!favorites.includes(id)&& carInStorage<=2) {
+                sessionStorage.setItem("carInStorage",Number(carInStorage)+Number(1))
+                favorites.push(id)
+                
+                sessionStorage.setItem("auto", JSON.stringify(favorites));
+                if(Number(carInStorage)+Number(1)==2){window.location.href="compare_car.html"}
+            }
+        }
+async function addToWishlist(carId, buttonElement) {
+            const token = sessionStorage.getItem('jwt');
+            
+            if (!token) {
+                showNotification("Увійдіть в систему для додавання в обране", "error");
+                window.location.href = "login.html";
+                return;
+            }
+            const isActive = buttonElement.classList.contains('active');
+            if(!isActive){
+            try {
+                const res = await fetch(`${API_URL_GLOB}/addWish/${carId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+
+                if (!res.ok) throw new Error("Помилка додавання в обране");
+
+                buttonElement.classList.add('active');
+                showNotification("Автомобіль додано в обране", "success");
+
+            } catch (error) {
+                console.error("Помилка:", error);
+                showNotification("Помилка додавання в обране", "error");
+            }}
+            else{
+                try {
+                const res = await fetch(`${API_URL_GLOB}/delete-by-id_car/${carId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+
+                if (!res.ok) throw new Error("Помилка видалення з обраного");
+
+                 buttonElement.classList.toggle('active');
+                showNotification("Автомобіль видалено з обраного", "success");
+
+            } catch (error) {
+                console.error("Помилка:", error);
+                showNotification("Помилка видалення з обраного", "error");
+            }
+            }
+        }
+    function showNotification(message, type) {
+    const notification = document.createElement("div");
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+
+    setTimeout(() => notification.classList.add("show"), 10);
+    setTimeout(() => {
+        notification.classList.remove("show");
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+        function editCar(id) {
+            window.location.href = `edit_car.html?carId=${id}`;
+        }
+        function goBack() {
+            window.history.back();
+        }
+        // Пошук при Enter
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCars();
+            
+            document.getElementById('searchInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    applyFilters();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
