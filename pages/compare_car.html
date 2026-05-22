@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Порівняння авто</title>
+    <link rel="stylesheet" href="../style/compare-cars.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Кнопка назад -->
+        <div class="back-button-container">
+            <button class="btn-back" onclick="goBack()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Назад
+            </button>
+        </div>
+
+        <!-- Заголовок -->
+        <h1 class="page-title">Порівняння автомобілів</h1>
+
+        <!-- Повідомлення про завантаження -->
+        <div id="loadingMessage" class="loading-message">
+            <div class="spinner"></div>
+            <p>Завантаження автомобілів для порівняння...</p>
+        </div>
+
+        <!-- Повідомлення про помилку -->
+        <div id="errorMessage" class="error-message" style="display: none;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+            </svg>
+            <h3>Недостатньо автомобілів для порівняння</h3>
+            <p>Оберіть щонайменше 2 автомобіля для порівняння</p>
+            <button class="btn-primary" onclick="goToHome()">Перейти до каталогу</button>
+        </div>
+
+        <!-- Таблиця порівняння -->
+        <div id="compareTable" class="compare-wrapper" style="display: none;">
+            <table class="compare-table">
+                <thead>
+                    <tr>
+                        <th class="param-column">Характеристика</th>
+                        <th class="car-column" id="carHeader1"></th>
+                        <th class="car-column" id="carHeader2"></th>
+                    </tr>
+                </thead>
+                <tbody id="compareBody">
+                    <!-- Дані додаються динамічно -->
+                </tbody>
+            </table>
+
+            <!-- Кнопки дій -->
+            <div class="actions-section">
+                <button class="btn-detail" onclick="viewDetails(1)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    Деталі першого авто
+                </button>
+                <button class="btn-detail" onclick="viewDetails(2)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    Деталі другого авто
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL_GLOB = "http://localhost:8080/api/v1";
+        let car1 = null;
+        let car2 = null;
+        let carId1 = null;
+        let carId2 = null;
+
+        async function loadCarsForComparison() {
+            const loadingMsg = document.getElementById('loadingMessage');
+            const errorMsg = document.getElementById('errorMessage');
+            const compareTable = document.getElementById('compareTable');
+
+            try {
+                // Отримати ID авто з sessionStorage
+                const favorites = JSON.parse(sessionStorage.getItem("auto")) || [];
+                
+                console.log("Favorites:", favorites);
+
+                if (favorites.length < 2) {
+                    loadingMsg.style.display = 'none';
+                    errorMsg.style.display = 'flex';
+                    return;
+                }
+
+                carId1 = favorites[0];
+                carId2 = favorites[1];
+
+                // Завантажити дані авто
+                const [response1, response2] = await Promise.all([
+                    fetch(`${API_URL_GLOB}/get-car-by/${carId1}`),
+                    fetch(`${API_URL_GLOB}/get-car-by/${carId2}`)
+                ]);
+
+                if (!response1.ok || !response2.ok) {
+                    throw new Error("Помилка завантаження даних авто");
+                }
+
+                car1 = await response1.json();
+                car2 = await response2.json();
+
+                console.log("Car 1:", car1);
+                console.log("Car 2:", car2);
+
+                loadingMsg.style.display = 'none';
+                compareTable.style.display = 'block';
+
+                displayComparison();
+
+            } catch (error) {
+                console.error("Помилка:", error);
+                loadingMsg.style.display = 'none';
+                errorMsg.style.display = 'flex';
+            }
+        }
+
+        function displayComparison() {
+            // Заголовки стовпців
+            document.getElementById('carHeader1').innerHTML = `
+                <div class="car-header-content">
+                    <img src="${car1.image}" alt="${car1.marka} ${car1.model}">
+                    <h3>${car1.marka} ${car1.model}</h3>
+                    <div class="car-year">${car1.year} рік</div>
+                </div>
+            `;
+
+            document.getElementById('carHeader2').innerHTML = `
+                <div class="car-header-content">
+                    <img src="${car2.image}" alt="${car2.marka} ${car2.model}">
+                    <h3>${car2.marka} ${car2.model}</h3>
+                    <div class="car-year">${car2.year} рік</div>
+                </div>
+            `;
+
+            // Таблиця порівняння
+            const tbody = document.getElementById('compareBody');
+            
+            const comparisons = [
+                {
+                    param: 'Ціна',
+                    val1: car1.price + ' $',
+                    val2: car2.price + ' $',
+                    highlight: car1.price < car2.price ? 1 : (car1.price > car2.price ? 2 : 0)
+                },
+                {
+                    param: 'Стан',
+                    val1: car1.condition,
+                    val2: car2.condition
+                },
+                {
+                    param: 'Колір',
+                    val1: car1.color,
+                    val2: car2.color
+                },
+                {
+                    param: 'Тип двигуна',
+                    val1: car1.engine_type,
+                    val2: car2.engine_type
+                },
+                {
+                    param: 'Потужність двигуна',
+                    val1: car1.engine_power + ' к.с.',
+                    val2: car2.engine_power + ' к.с.',
+                    highlight: car1.engine_power > car2.engine_power ? 1 : (car1.engine_power < car2.engine_power ? 2 : 0)
+                },
+                {
+                    param: 'Трансмісія',
+                    val1: car1.transmission,
+                    val2: car2.transmission
+                },
+                {
+                    param: 'Тип кузова',
+                    val1: car1.body_type,
+                    val2: car2.body_type
+                },
+                {
+                    param: 'Кількість дверей',
+                    val1: car1.doors,
+                    val2: car2.doors
+                }
+            ];
+
+            comparisons.forEach(item => {
+                const row = document.createElement('tr');
+                
+                const paramCell = document.createElement('td');
+                paramCell.className = 'param-cell';
+                paramCell.textContent = item.param;
+                row.appendChild(paramCell);
+
+                const val1Cell = document.createElement('td');
+                val1Cell.className = 'value-cell';
+                if (item.highlight === 1) val1Cell.classList.add('better');
+                val1Cell.textContent = item.val1;
+                row.appendChild(val1Cell);
+
+                const val2Cell = document.createElement('td');
+                val2Cell.className = 'value-cell';
+                if (item.highlight === 2) val2Cell.classList.add('better');
+                val2Cell.textContent = item.val2;
+                row.appendChild(val2Cell);
+
+                tbody.appendChild(row);
+            });
+
+            // Опис
+            const descRow = document.createElement('tr');
+            descRow.innerHTML = `
+                <td class="param-cell">Опис</td>
+                <td class="value-cell description-cell">${car1.description || '—'}</td>
+                <td class="value-cell description-cell">${car2.description || '—'}</td>
+            `;
+            tbody.appendChild(descRow);
+        }
+
+        function viewDetails(carNumber) {
+            const carId = carNumber === 1 ? carId1 : carId2;
+            window.location.href = `car_detail.html?carId=${carId}`;
+        }
+
+        function goBack() {
+            sessionStorage.removeItem("auto");
+            sessionStorage.removeItem("carInStorage");
+            window.history.back();
+        }
+
+        function goToHome() {
+            window.location.href = 'home.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', loadCarsForComparison);
+    </script>
+</body>
+</html>

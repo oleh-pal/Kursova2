@@ -1,0 +1,84 @@
+body {
+            background: #e9ecef;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.15);
+        }
+        h2, h3 {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        form label {
+            font-weight: bold;
+        }
+        form input, form select, form textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        button {
+            text-align: center;
+            color: #fff;
+            background-color: #1e2d3c;
+            border: none;
+            border-radius: 10px;
+            text-decoration: none;
+            cursor: pointer;
+            width: 100%;
+            height: 40px;
+        }
+        button:hover {  
+            background-color:#1e2d3c;
+            transform: translateY(-2px);
+         }
+
+        #options-block {
+            display: none;
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+        }
+        .opt_lable{
+            margin-bottom: 10px;
+            width: 100%;
+            
+        }
+        .btn_cont{
+            display:flex;
+            flex-direction: row;
+            justify-content:space-around
+        }
+        .btn_cont button {
+            width: 250px;     
+            flex: none;       
+            padding: 10px 25px; 
+}
+        #optionsTable{
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            margin-top: 15px;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+        th, td {
+            padding: 8px;
+            text-align: center;
+        }

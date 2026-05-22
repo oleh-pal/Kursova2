@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редагування авто</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../style/edit-car.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header-section">
+            <h2 class="page-title">Редагування авто</h2>
+            <button type="button" class="btn-back" onclick="goBack()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Назад
+            </button>
+        </div>
+
+        <div id="loadingMessage" class="loading-message">
+            <div class="spinner"></div>
+            <p>Завантаження даних...</p>
+        </div>
+
+        <div id="editForm" class="edit-form" style="display: none;">
+            <form onsubmit="updateCar(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Марка</label>
+                        <input type="text" id="marka" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Модель</label>
+                        <input type="text" id="model" class="form-input" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Рік випуску</label>
+                        <input type="number" id="year" class="form-input" min="1900" max="2025" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Колір</label>
+                        <input type="text" id="color" class="form-input" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Ціна ($)</label>
+                        <input type="number" id="price" class="form-input" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Стан</label>
+                        <select id="condition" class="form-input" required>
+                            <option value="">Оберіть стан</option>
+                            <option value="Нове">Нове</option>
+                            <option value="Вживане">Вживане</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Тип двигуна</label>
+                        <select id="engine_type" class="form-input" required>
+                            <option value="">Оберіть тип</option>
+                            <option value="Бензин">Бензин</option>
+                            <option value="Дизель">Дизель</option>
+                            <option value="Електро">Електро</option>
+                            <option value="Гібрид">Гібрид</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Потужність двигуна (к.с.)</label>
+                        <input type="number" id="engine_power" class="form-input" min="0" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Коробка передач</label>
+                        <select id="transmission" class="form-input" required>
+                            <option value="">Оберіть КПП</option>
+                            <option value="Механічна">Механічна</option>
+                            <option value="Автоматична">Автоматична</option>
+                            <option value="Варіатор">Варіатор</option>
+                            <option value="Робот">Робот</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Тип кузова</label>
+                        <input type="text" id="body_type" class="form-input" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label class="form-label">Кількість дверей</label>
+                        <input type="number" id="doors" class="form-input" min="2" max="5" required>
+                    </div>
+                </div>
+               <label>Обрати нове фото авто</label>
+                <input type="file" id="fileInput" accept="image/*">
+                <div class="form-group">
+                    <label class="form-label">Опис</label>
+                    <textarea id="description" class="form-textarea" rows="4" required></textarea>
+                </div>
+
+                <div class="preview-section" id="imagePreview" style="display: none;">
+                    <label class="form-label">Поточне фото авто:</label>
+                    <img id="previewImage" class="preview-image" alt="Preview">
+                </div>
+
+                <div class="button-container">
+                    <button type="submit" class="btn-primary" id="submitBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                            <polyline points="7 3 7 8 15 8"></polyline>
+                        </svg>
+                        Зберегти зміни
+                    </button>
+                    <button type="button" class="btn-secondary" onclick="goBack()">
+                        Скасувати
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const carId = params.get("carId");
+        const token = sessionStorage.getItem('jwt');
+        const API_URL_GLOB = "http://localhost:8080/api/v1";
+        let currentImageUrl = null;
+        if (!token) {
+            alert("Ви не авторизовані!");
+            window.location.href = "home.html";
+        }
+
+        if (!carId) {
+            alert("ID автомобіля не вказано!");
+            window.history.back();
+        }
+        
+        // Завантаження даних авто
+        async function loadCarData() {
+            try {
+                const loadingMsg = document.getElementById("loadingMessage");
+                const editForm = document.getElementById("editForm");
+
+                const res = await fetch(`${API_URL_GLOB}/get-car-by/${carId}`, {
+                    headers: { "Authorization": "Bearer " + token }
+                });
+
+                if (!res.ok) throw new Error("Помилка завантаження даних авто");
+
+                const car = await res.json();
+                currentImageUrl = car.image;
+                // Заповнити форму
+                document.getElementById("marka").value = car.marka || "";
+                document.getElementById("model").value = car.model || "";
+                document.getElementById("year").value = car.year || "";
+                document.getElementById("color").value = car.color || "";
+                document.getElementById("price").value = car.price || "";
+                document.getElementById("condition").value = car.condition || "";
+                document.getElementById("engine_type").value = car.engine_type || "";
+                document.getElementById("engine_power").value = car.engine_power || "";
+                document.getElementById("transmission").value = car.transmission || "";
+                document.getElementById("body_type").value = car.body_type || "";
+                document.getElementById("doors").value = car.doors || "";
+                document.getElementById("description").value = car.description || "";
+
+                // Показати попередній перегляд зображення
+               if (currentImageUrl) {
+                showImagePreview(currentImageUrl);
+                }               
+
+                loadingMsg.style.display = "none";
+                editForm.style.display = "block";
+
+            } catch (error) {
+                console.error("Помилка:", error);
+                document.getElementById("loadingMessage").innerHTML = 
+                    '<p style="color: #dc3545;">Помилка завантаження даних авто</p>';
+            }
+        }
+
+        function showImagePreview(url) {
+            const preview = document.getElementById("imagePreview");
+            const img = document.getElementById("previewImage");
+            
+            img.src = url;
+            preview.style.display = "block";
+
+            img.onerror = function() {
+                preview.style.display = "none";
+            };
+        }
+
+        async function updateCar(event) {
+    event.preventDefault();
+
+    const fileInput = document.getElementById("fileInput");
+    const submitBtn = document.getElementById("submitBtn");
+
+    const car = {
+        id_cars: carId,
+        marka: marka.value,
+        model: model.value,
+        year: +year.value,
+        color: color.value,
+        price: +price.value,
+        condition: condition.value,
+        engine_type: engine_type.value,
+        engine_power: +engine_power.value,
+        transmission: transmission.value,
+        body_type: body_type.value,
+        doors: +doors.value,
+        description: description.value
+        
+    };
+
+    const formData = new FormData();
+    formData.append(
+        "car",
+        new Blob([JSON.stringify(car)], { type: "application/json" })
+    );
+
+    // ✅ тільки якщо реально вибрали новий файл
+    if (fileInput.files.length > 0) {
+        formData.append("file", fileInput.files[0]);
+    }
+
+    try {
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Збереження...";
+
+        const res = await fetch(`${API_URL_GLOB}/update-car/${carId}`, {
+            method: "PUT",
+            headers: {
+                "Authorization": "Bearer " + token
+            },
+            body: formData
+        });
+
+        if (!res.ok) throw new Error();
+
+        showNotification("Автомобіль оновлено ✅", "success");
+        setTimeout(() => history.back(), 1200);
+
+    } catch (e) {
+        showNotification("Помилка оновлення ❌", "error");
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Зберегти зміни";
+    }
+}
+
+        function goBack() {
+            window.history.back();
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement("div");
+            notification.className = `notification notification-${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.classList.add("show"), 10);
+            setTimeout(() => {
+                notification.classList.remove("show");
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        document.addEventListener("DOMContentLoaded", loadCarData);
+    </script>
+</body>
+</html>

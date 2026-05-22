@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профіль користувача</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../style/user-profile.css">
+</head>
+<body>
+    <div class="container">
+        <h2 class="page-title">Мій профіль</h2>
+        
+        <div id="loadingMessage" class="loading-message">
+            <div class="spinner"></div>
+            <p>Завантаження даних...</p>
+        </div>
+
+        <div id="profileContent" class="profile-content" style="display: none;">
+            <!-- Блок перегляду даних -->
+            <div id="viewMode" class="profile-section">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <span id="avatarInitials"></span>
+                    </div>
+                    <div class="profile-info">
+                        <h3 id="userName" class="user-name"></h3>
+                        <p id="userRole" class="user-role"></p>
+                    </div>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label class="info-label">Ім'я</label>
+                        <p id="displayName" class="info-value"></p>
+                    </div>
+                    <div class="info-item">
+                        <label class="info-label">Email</label>
+                        <p id="displayEmail" class="info-value"></p>
+                    </div>
+                    <div class="info-item">
+                        <label class="info-label">Номер телефону</label>
+                        <p id="displayPhone" class="info-value"></p>
+                    </div>
+                </div>
+
+                <div class="button-container">
+                    <button type="button" class="btn-primary" onclick="enableEditMode()">
+                        Редагувати профіль
+                    </button>
+                    <button type="button" class="btn-secondary" onclick="goBack()">
+                        Повернутися назад
+                    </button>
+                </div>
+            </div>
+
+            <!-- Блок редагування даних -->
+            <div id="editMode" class="profile-section" style="display: none;">
+                <form id="editForm" onsubmit="saveProfile(event)">
+                    <div class="form-group">
+                        <label for="editName" class="form-label">Ім'я</label>
+                        <input type="text" id="editName" class="form-input" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editEmail" class="form-label">Email</label>
+                        <input type="email" id="editEmail" class="form-input" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editPhone" class="form-label">Номер телефону</label>
+                        <input type="tel" id="editPhone" class="form-input" placeholder="+380XXXXXXXXX" required>
+                    </div>
+
+                    <div class="button-container">
+                        <button type="submit" class="btn-primary">
+                            Зберегти зміни
+                        </button>
+                        <button type="button" class="btn-secondary" onclick="cancelEdit()">
+                            Скасувати
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const token = sessionStorage.getItem("jwt");
+        const API_URL_GLOB = "http://localhost:8080/api/v1";
+        let currentUser = null;
+
+        if (!token) {
+            alert("Ви не авторизовані!");
+            window.location.href = "home.html";
+        }
+
+        // Завантаження даних користувача
+        async function loadUserProfile() {
+            try {
+                const loadingMsg = document.getElementById("loadingMessage");
+                const profileContent = document.getElementById("profileContent");
+
+                loadingMsg.style.display = "flex";
+
+                const res = await fetch(`${API_URL_GLOB}/currentUser`, {
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    }
+                });
+
+                if (!res.ok) {
+                    throw new Error("Помилка завантаження даних користувача");
+                }
+
+                currentUser = await res.json();
+
+                loadingMsg.style.display = "none";
+                profileContent.style.display = "block";
+
+                displayUserData();
+
+            } catch (error) {
+                console.error("Помилка:", error);
+                document.getElementById("loadingMessage").innerHTML = 
+                    '<p style="color: #dc3545;">Помилка завантаження профілю</p>';
+            }
+        }
+
+        // Відображення даних користувача
+        function displayUserData() {
+            // Ініціали для аватара
+            const initials = currentUser.name 
+                ? currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase()
+                : currentUser.email[0].toUpperCase();
+            
+            document.getElementById("avatarInitials").textContent = initials;
+            document.getElementById("userName").textContent = currentUser.name || "Користувач";
+            document.getElementById("userRole").textContent = currentUser.role || "Користувач";
+
+            document.getElementById("displayName").textContent = currentUser.name || "—";
+            document.getElementById("displayEmail").textContent = currentUser.email || "—";
+            document.getElementById("displayPhone").textContent = currentUser.phone || "—";
+        }
+
+        // Увімкнути режим редагування
+        function enableEditMode() {
+            document.getElementById("viewMode").style.display = "none";
+            document.getElementById("editMode").style.display = "block";
+
+            // Заповнити форму поточними даними
+            document.getElementById("editName").value = currentUser.name || "";
+            document.getElementById("editEmail").value = currentUser.email || "";
+            document.getElementById("editPhone").value = currentUser.phone || "";
+        }
+
+        // Скасувати редагування
+        function cancelEdit() {
+            document.getElementById("editMode").style.display = "none";
+            document.getElementById("viewMode").style.display = "block";
+        }
+
+        // Зберегти зміни профілю
+        async function saveProfile(event) {
+            event.preventDefault();
+
+            const updatedData = {
+                name: document.getElementById("editName").value,
+                email: document.getElementById("editEmail").value,
+                phone: document.getElementById("editPhone").value
+            };
+
+            try {
+                const res = await fetch(`${API_URL_GLOB}/update-user`, {
+                    method: "PUT",
+                    headers: {
+                        "Authorization": "Bearer " + token,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(updatedData)
+                });
+
+                if (!res.ok) {
+                    throw new Error("Помилка оновлення профілю");
+                }
+
+                const result = await res.json();
+                currentUser = result;
+
+                displayUserData();
+                cancelEdit();
+                
+                showNotification("Профіль успішно оновлено!", "success");
+
+            } catch (error) {
+                console.error("Помилка оновлення:", error);
+                showNotification("Помилка оновлення профілю. Спробуйте ще раз.", "error");
+            }
+        }
+
+        // Показати сповіщення
+        function showNotification(message, type) {
+            const notification = document.createElement("div");
+            notification.className = `notification notification-${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.classList.add("show"), 10);
+            setTimeout(() => {
+                notification.classList.remove("show");
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Повернутися назад
+        function goBack() {
+            window.history.back();
+        }
+
+        document.addEventListener("DOMContentLoaded", loadUserProfile);
+    </script>
+</body>
+</html>
